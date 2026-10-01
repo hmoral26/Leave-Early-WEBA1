@@ -46,6 +46,7 @@ st.caption("Seven-day rain forecast for the drive to New College.")
 
 # SESSION STATE
 # these two get used on This Week so they dont reset when I switch pages
+# first visit only. these two have to exist before This Week reads them
 if "place" not in st.session_state:
     st.session_state.place = "NCF campus"
 if "rain_cutoff" not in st.session_state:
@@ -86,6 +87,7 @@ st.divider()
 st.subheader("Set when rain is enough to matter")
 st.write("These choices stay selected when you open the ", "This Week", " page.")
 
+#This block picks which city the dropdown should open on.
 places = ["NCF campus", "Bradenton", "Venice", "Tampa"]
 if st.session_state.place in places:
     start = places.index(st.session_state.place)
@@ -95,7 +97,7 @@ else:
 c1, c2 = st.columns(2)
 with c1:
     place = st.selectbox("Starting location", places, index=start)
-    st.session_state.place = place
+    st.session_state.place = place # save city so This Week does not reset
 with c2:
     cutoff = st.slider(
         "Treat a day as wet when rain chance reaches (%)",
@@ -104,7 +106,7 @@ with c2:
         value=int(st.session_state.rain_cutoff),
         step=5,
     )
-    st.session_state.rain_cutoff = cutoff
+    st.session_state.rain_cutoff = cutoff # save rain limit across the page jump
 
 st.write("Wet-day limit: " + str(cutoff) + "% · Location: " + place)
 st.page_link("pages/1_This_Week.py", label="Open this week's forecast")

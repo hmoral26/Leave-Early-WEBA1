@@ -60,6 +60,7 @@ PLACES = {
 
 # SESSION STATE
 # same keys as home
+#without these, this page always opens at NCF and 40%
 if "place" not in st.session_state:
     st.session_state.place = "NCF campus"
 if "rain_cutoff" not in st.session_state:
@@ -69,7 +70,10 @@ if "rain_cutoff" not in st.session_state:
 # LOAD
 # one get request, then turn json into two tables
 # cache so moving a slider doesnt hit the api again
-@st.cache_data(ttl=3600)
+## cache is the forecast, not the user's choice. 
+# slider does not refetch. new city does
+
+@st.cache_data(ttl=3600) #remember the result of load_forecast for one hour.
 def load_forecast(place_name):
     lat, lon = PLACES[place_name]
     r = requests.get(
@@ -124,12 +128,14 @@ with st.sidebar:
 # place changes which forecast we load
 # slider + checkbox cut the table
 place_list = list(PLACES.keys())
-place_start = place_list.index(st.session_state.place)
+place_start = place_list.index(st.session_state.place) #puts the save city back into the drop down
 
 st.subheader("Filter the week")
 f1, f2, f3 = st.columns(3)
 with f1:
     place = st.selectbox("Starting location", place_list, index=place_start)
+
+    #widget changes
     st.session_state.place = place
 with f2:
     cutoff = st.slider(
@@ -144,6 +150,8 @@ with f3:
     wet_only = st.checkbox("Show only wet days")
 
 
+#What if API fails?
+
 try:
     daily, hourly = load_forecast(place)
 except Exception:
@@ -152,15 +160,20 @@ except Exception:
 
 
 # APPLY FILTERS
+# checkbox stacks on the slider. charts must use filtered, not daily
 filtered = daily.copy()
-if wet_only:
+if wet_only: #second filter. checkbox stacks on the slider. charts must use filtered, not daily
     filtered = filtered[filtered["rain_chance"] >= cutoff]
 
 
 # METRICS
 # first one uses the whole week + cutoff
 # other two use whatever is on screen
-leave_early_days = int((daily["rain_chance"] >= cutoff).sum())
+## counted here. not a column from the API. 
+# Uses the day's max rain chance
+
+#counts days at or above slider
+leave_early_days = int((daily["rain_chance"] >= cutoff).sum()) 
 if len(filtered) > 0:
     worst = int(filtered["rain_chance"].max())
     avg_high = round(filtered["high_f"].mean(), 1)
@@ -175,15 +188,16 @@ m3.metric("Average high (shown)", str(avg_high) + " °F")
 
 
 # EMPTY
+## stop so an empty filter does not draw a blank chart
 if len(filtered) == 0:
     st.warning("No days match. Clear the checkbox or lower the slider.")
-    st.stop()
+    st.stop() #stops the script so an empty filter does not draw a blank chart.
 
 
 # TABLE
 st.subheader("Days that match")
 show = filtered.copy()
-show["date"] = show["date"].dt.strftime("%a %b %d")
+show["date"] = show["date"].dt.strftime("%a %b %d") #format the date for the table. not a column from the API.
 st.dataframe(
     show.rename(columns={
         "date": "Day",
@@ -219,6 +233,11 @@ with c1:
 
 with c2:
     st.write("Morning rain chance (6–10 a.m.)")
+
+    # agrregate the hourly rows into one morning number per day. 
+    # then filter to the days that are showing in the table.
+
+    # grouped chart: 6-10am hours averaged into one morning number per day
     morning = hourly[(hourly["hour"] >= 6) & (hourly["hour"] <= 10)]
     by_day = morning.groupby("date", as_index=False)["rain_chance"].mean()
     by_day = by_day[by_day["date"].isin(filtered["date"])]
