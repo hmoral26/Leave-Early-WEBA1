@@ -5,7 +5,7 @@
 import streamlit as st
 
 
-st.set_page_config(page_title="Leave Early?", page_icon="☔", layout="wide")
+st.set_page_config(page_title="Is the drive wet?", page_icon="☔️", layout="wide")
 
 
 # STYLE
