@@ -84,9 +84,10 @@ def load_forecast(place_name):
 # SIDEBAR
 # shows the values that carried over
 with st.sidebar:
-    st.header("Carried over")
+    st.header("Your settings")
     st.write("Location: " + st.session_state.place)
-    st.write("Rain limit: " + str(st.session_state.rain_cutoff) + "%")
+    st.write("Treat as wet at " + str(st.session_state.rain_cutoff) + "%")
+    st.caption("Edit these on the app page if you want to change them.")
 
 
 # FILTERS
