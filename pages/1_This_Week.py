@@ -59,7 +59,7 @@ PLACES = {
 
 
 # SESSION STATE
-# same keys as home
+# same keys as app
 #without these, this page always opens at NCF and 40%
 if "place" not in st.session_state:
     st.session_state.place = "NCF campus"
@@ -121,7 +121,7 @@ with st.sidebar:
     st.header("Your settings")
     st.write("Location: " + st.session_state.place)
     st.write("Treat as wet at " + str(st.session_state.rain_cutoff) + "%")
-    st.caption("Edit these on the Home page if you want to change them.")
+    st.caption("Edit these on the app page if you want to change them.")
 
 
 # FILTERS
@@ -197,7 +197,7 @@ if len(filtered) == 0:
 # TABLE
 st.subheader("Days that match")
 show = filtered.copy()
-show["date"] = show["date"].dt.strftime("%a %b %d") #format the date for the table. not a column from the API.
+show["date"] = show["date"].dt.strftime("%a %b %d") #Day of week, month, day of month.
 st.dataframe(
     show.rename(columns={
         "date": "Day",

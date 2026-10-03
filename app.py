@@ -1,4 +1,4 @@
-# home page
+# app page
 # problem + the two settings the other page reads
 
 
@@ -85,7 +85,7 @@ st.divider()
 # SETTINGS
 # whatever I pick here should still be selected on This Week
 st.subheader("Set when rain is enough to matter")
-st.write("These choices stay selected when you open the ", "This Week", " page.")
+st.write("These choices stay selected on This Week and Morning hours.")
 
 #This block picks which city the dropdown should open on.
 places = ["NCF campus", "Bradenton", "Venice", "Tampa"]
